@@ -71,7 +71,7 @@ dependencies {
     implementation 'com.amplifyframework:core:2.33.0'
 
     // Support for Java 8 features
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     // FaceLivenessDetector dependency
     implementation 'com.amplifyframework.ui:liveness:1.9.0'
