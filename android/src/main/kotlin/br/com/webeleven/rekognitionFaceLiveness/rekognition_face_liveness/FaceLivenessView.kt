@@ -9,6 +9,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
 import com.amplifyframework.ui.liveness.ui.FaceLivenessDetector
+import com.amplifyframework.ui.liveness.ui.ChallengeOptions
+import com.amplifyframework.ui.liveness.ui.LivenessChallenge
+import com.amplifyframework.ui.liveness.ui.Camera
 import com.amplifyframework.ui.liveness.ui.LivenessColorScheme
 import io.flutter.plugin.platform.PlatformView
 
@@ -22,6 +25,7 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
     override fun dispose() {}
 
     init {
+        val challengeOptions = buildChallengeOptions(creationParams) ?: ChallengeOptions()
         composeView.setContent {
             MaterialTheme(
                 colorScheme = lightColorScheme(
@@ -40,6 +44,7 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
                 FaceLivenessDetector(
                     sessionId = creationParams?.get("sessionId") as String,
                     region = creationParams["region"] as String,
+                    challengeOptions = challengeOptions,
                     onComplete = {
                         handler.onComplete()
                     },
@@ -68,5 +73,19 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
                 )
             }
         }
+    }
+
+    private fun buildChallengeOptions(creationParams: Map<String?, Any?>?): ChallengeOptions? {
+        val challengeOptions = creationParams?.get("challengeOptions") as? Map<*, *> ?: return null
+        val faceMovement = challengeOptions["faceMovement"] as? Map<*, *> ?: return null
+        val cameraValue = faceMovement["camera"] as? String ?: return null
+        val camera = when (cameraValue) {
+            "back" -> Camera.Back
+            "front" -> Camera.Front
+            else -> null
+        } ?: return null
+        return ChallengeOptions(
+            faceMovement = LivenessChallenge.FaceMovement(camera = camera)
+        )
     }
 }

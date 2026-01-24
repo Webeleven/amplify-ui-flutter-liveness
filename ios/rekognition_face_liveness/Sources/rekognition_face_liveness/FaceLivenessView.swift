@@ -24,6 +24,7 @@ class FaceLivenessView: NSObject, FlutterPlatformView {
     
     func createNativeView(view _view: UIView, arguments args: Any?, handler: EventStreamHadler){
         guard let args = args as? [String: Any] else { return }
+        let challengeOptions = buildChallengeOptions(from: args)
         
         let keyWindows = UIApplication.shared.windows.first(where: { $0.isKeyWindow}) ?? UIApplication.shared.windows.first
         let topController = keyWindows?.rootViewController
@@ -32,6 +33,7 @@ class FaceLivenessView: NSObject, FlutterPlatformView {
             rootView: NativeView(
                 sessionId: args["sessionId"] as! String,
                 region: args["region"] as! String,
+                challengeOptions: challengeOptions,
                 handler: handler
             )
         )
@@ -52,19 +54,43 @@ class FaceLivenessView: NSObject, FlutterPlatformView {
         
         vc.didMove(toParent: topController)
     }
+
+    private func buildChallengeOptions(from args: [String: Any]) -> ChallengeOptions? {
+        guard
+            let options = args["challengeOptions"] as? [String: Any],
+            let faceMovement = options["faceMovement"] as? [String: Any],
+            let cameraValue = faceMovement["camera"] as? String
+        else {
+            return nil
+        }
+
+        let faceMovementOption: FaceMovementChallengeOption
+        switch cameraValue {
+        case "back":
+            faceMovementOption = .init(camera: .back)
+        case "front":
+            faceMovementOption = .init(camera: .front)
+        default:
+            return nil
+        }
+
+        return ChallengeOptions(faceMovementChallengeOption: faceMovementOption)
+    }
 }
 
 
 struct NativeView: View {
     let sessionId: String
     let region: String
+    let challengeOptions: ChallengeOptions?
     let handler: EventStreamHadler
     
     @State private var isPresentingLiveness = true
     
-    init(sessionId: String, region: String, handler: EventStreamHadler) {
+    init(sessionId: String, region: String, challengeOptions: ChallengeOptions?, handler: EventStreamHadler) {
         self.sessionId = sessionId
         self.region = region
+        self.challengeOptions = challengeOptions
         self.handler = handler
     }
 
@@ -72,6 +98,7 @@ struct NativeView: View {
         FaceLivenessDetectorView(
             sessionID: self.sessionId,
             region: self.region,
+            challengeOptions: challengeOptions ?? ChallengeOptions(),
             isPresented: $isPresentingLiveness,
             onCompletion: { result in
                 switch result {
