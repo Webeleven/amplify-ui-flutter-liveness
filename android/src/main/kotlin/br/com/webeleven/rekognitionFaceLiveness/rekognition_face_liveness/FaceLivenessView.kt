@@ -66,7 +66,9 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
                                 handler.onError("userCancelled")
                             }
                             else -> {
-                                handler.onError("error")
+                                val errorType = error::class.simpleName ?: "Unknown"
+                                val errorMsg = error.message ?: error.toString()
+                                handler.onError("error:$errorType:$errorMsg")
                             }
                         }
                     }

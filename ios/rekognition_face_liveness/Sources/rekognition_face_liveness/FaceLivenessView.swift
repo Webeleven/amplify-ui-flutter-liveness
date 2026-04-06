@@ -116,7 +116,9 @@ struct NativeView: View {
                         handler.onError(code: "sessionNotFound")
                         return
                     default:
-                        handler.onError(code: "error")
+                        let errorType = String(describing: type(of: error))
+                        let errorMsg = error.localizedDescription
+                        handler.onError(code: "error:\(errorType):\(errorMsg)")
                         return
                     }
                 default:
