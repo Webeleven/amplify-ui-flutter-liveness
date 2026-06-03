@@ -1,3 +1,11 @@
+## 0.0.3
+
+* iOS: bump the liveness SDK fork to `1.4.4-webeleven.2`, which adds two PR-review
+  hardenings on top of 0.0.2: deliver the final single frame on the main queue (outside the
+  serial lock) and only call `finishWriting` when the writer status is `.writing`. Uses a
+  fresh immutable tag (the previous `1.4.4-webeleven.1` tag had been moved, which broke SPM
+  resolution).
+
 ## 0.0.2
 
 * iOS: fix fatal `NSInternalInconsistencyException` ("Must start a session ... before
