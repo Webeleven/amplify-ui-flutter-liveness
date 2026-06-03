@@ -21,7 +21,7 @@ let package = Package(
         // NSInternalInconsistencyException "Must start a session ... before appending pixel
         // buffers"). The bug is still present in upstream 1.4.4. Drop this fork and return to
         // the upstream package once the fix lands upstream.
-        .package(url: "https://github.com/Webeleven/amplify-ui-swift-liveness", exact: "1.4.4-webeleven.1")
+        .package(url: "https://github.com/Webeleven/amplify-ui-swift-liveness", exact: "1.4.4-webeleven.2")
     ],
     targets: [
         .target(
