@@ -16,7 +16,12 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/aws-amplify/amplify-swift", from: "2.3.1"),
-        .package(url: "https://github.com/aws-amplify/amplify-ui-swift-liveness", from: "1.3.4")
+        // Webeleven fork of amplify-ui-swift-liveness, pinned to a patched 1.4.4 that fixes
+        // the VideoChunker AVAssetWriter append-after-finish data race (crash:
+        // NSInternalInconsistencyException "Must start a session ... before appending pixel
+        // buffers"). The bug is still present in upstream 1.4.4. Drop this fork and return to
+        // the upstream package once the fix lands upstream.
+        .package(url: "https://github.com/Webeleven/amplify-ui-swift-liveness", exact: "1.4.4-webeleven.1")
     ],
     targets: [
         .target(
