@@ -1,3 +1,17 @@
+## 0.0.4
+
+* iOS: map `accessDenied` and `cameraPermissionDenied` to the same stable codes
+  Android already emits, and resolve a stable member name for every other
+  `FaceLivenessDetectionError` in the fallback (`error:<name>:<message>`, using the
+  SDK's fixed English `message` instead of the locale-dependent
+  `localizedDescription`). Previously every unmapped iOS error stringified to the
+  same struct type name, so consumers (e.g. Sentry grouping) could not tell a
+  credentials outage from a benign timeout.
+* Dart: cancel the `face_liveness_event` subscription in `dispose`. The previous
+  code never cancelled, so the last detector's callbacks stayed subscribed to the
+  broadcast channel for the app's lifetime and late native events (teardown
+  errors) still reached widgets that were already gone.
+
 ## 0.0.3
 
 * iOS: bump the liveness SDK fork to `1.4.4-webeleven.2`, which adds two PR-review

@@ -115,10 +115,18 @@ struct NativeView: View {
                     case .sessionNotFound:
                         handler.onError(code: "sessionNotFound")
                         return
+                    case .accessDenied:
+                        handler.onError(code: "accessDenied")
+                        return
+                    case .cameraPermissionDenied:
+                        handler.onError(code: "cameraPermissionDenied")
+                        return
                     default:
-                        let errorType = String(describing: type(of: error))
-                        let errorMsg = error.localizedDescription
-                        handler.onError(code: "error:\(errorType):\(errorMsg)")
+                        // `error.message` is the SDK's fixed English text — unlike
+                        // localizedDescription, it doesn't vary with device locale.
+                        handler.onError(
+                            code: "error:\(stableErrorName(for: error)):\(error.message)"
+                        )
                         return
                     }
                 default:
@@ -127,4 +135,29 @@ struct NativeView: View {
             }
         )
     }
+}
+
+/// Stable name for a `FaceLivenessDetectionError`, mirroring the per-class
+/// granularity Android gets from exception type names. The SDK models every
+/// error as the same Equatable struct, so `type(of:)` names them all
+/// identically; matching against the SDK's static members recovers the case
+/// name so consumers can distinguish causes (Sentry grouping, alerting).
+private func stableErrorName(for error: FaceLivenessDetectionError) -> String {
+    let knownErrors: [(FaceLivenessDetectionError, String)] = [
+        (.unknown, "unknown"),
+        (.faceInOvalMatchExceededTimeLimitError, "faceInOvalMatchExceededTimeLimit"),
+        (.socketClosed, "socketClosed"),
+        (.countdownFaceTooClose, "countdownFaceTooClose"),
+        (.countdownMultipleFaces, "countdownMultipleFaces"),
+        (.countdownNoFace, "countdownNoFace"),
+        (.invalidRegion, "invalidRegion"),
+        (.validation, "validation"),
+        (.internalServer, "internalServer"),
+        (.throttling, "throttling"),
+        (.serviceQuotaExceeded, "serviceQuotaExceeded"),
+        (.serviceUnavailable, "serviceUnavailable"),
+        (.invalidSignature, "invalidSignature"),
+        (.cameraNotAvailable, "cameraNotAvailable"),
+    ]
+    return knownErrors.first { $0.0 == error }?.1 ?? "FaceLivenessDetectionError"
 }

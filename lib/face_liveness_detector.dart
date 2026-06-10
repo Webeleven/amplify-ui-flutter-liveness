@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -25,17 +26,28 @@ class FaceLivenessDetector extends StatefulWidget {
 
 class _FaceLivenessDetectorState extends State<FaceLivenessDetector> {
   final _eventChannel = EventChannel('face_liveness_event');
+  StreamSubscription<dynamic>? _eventSubscription;
 
   @override
   void initState() {
     super.initState();
-    _eventChannel.receiveBroadcastStream().listen((event) {
+    _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
       if (event == 'complete') {
         widget.onComplete?.call();
       } else {
         widget.onError?.call(event);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // Without cancelling, the callbacks of the last detector stay subscribed
+    // to the broadcast channel for the app's lifetime, so late native events
+    // (e.g. teardown errors) still reach a widget that is already gone.
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+    super.dispose();
   }
 
   @override
